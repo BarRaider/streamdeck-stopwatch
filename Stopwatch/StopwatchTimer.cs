@@ -54,16 +54,15 @@ namespace Stopwatch
             public streamdeck_client_csharp.StreamDeckConnection StreamDeckConnection { private get; set; }
         }
 
-        #region Public properties
-
-        public long StopwatchSeconds { get; private set; }
-
-        #endregion
-
         #region Private members
+
+        private const int RESET_COUNTER_KEYPRESS_LENGTH = 2;
 
         private Timer tmrStopwatch;
         private InspectorSettings settings;
+        private bool keyPressed = false;
+        private DateTime keyPressStart;
+        private long stopwatchSeconds;
 
         #endregion
 
@@ -88,6 +87,10 @@ namespace Stopwatch
 
         public void TriggerStopwatch()
         {
+            // Used for long press
+            keyPressStart = DateTime.Now;
+            keyPressed = true;
+
             if (tmrStopwatch != null && tmrStopwatch.Enabled)
             {
                 PauseStopwatch();
@@ -103,12 +106,21 @@ namespace Stopwatch
             }
         }
 
+        public void KeyReleased()
+        {
+            keyPressed = false;
+        }
+
         public string GetCurrentStopwatchValue()
         {
             long total, minutes, seconds, hours;
             string delimiter = settings.Multiline ? "\n" : ":";
 
-            total = StopwatchSeconds;
+            // Stream Deck calls this function every second, 
+            // so this is the best place to determine if we need to reset (versus the internal timer which may be paused)
+            CheckIfResetNeeded();
+
+            total = stopwatchSeconds;
             minutes = total / 60;
             seconds = total % 60;
             hours = minutes / 60;
@@ -146,7 +158,7 @@ namespace Stopwatch
 
         private void ResetCounter()
         {
-            StopwatchSeconds = 0;
+            stopwatchSeconds = 0;
         }
 
         private void ResumeStopwatch()
@@ -160,9 +172,23 @@ namespace Stopwatch
             tmrStopwatch.Start();
         }
 
+        private void CheckIfResetNeeded()
+        {
+            if (!keyPressed)
+            {
+                return;
+            }
+
+            if ((DateTime.Now - keyPressStart).TotalSeconds > RESET_COUNTER_KEYPRESS_LENGTH)
+            {
+                PauseStopwatch();
+                ResetCounter();
+            }
+        }
+
         private void TmrStopwatch_Elapsed(object sender, ElapsedEventArgs e)
         {
-            StopwatchSeconds++;
+            stopwatchSeconds++;
         }
 
         private void PauseStopwatch()

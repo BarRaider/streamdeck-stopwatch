@@ -8,6 +8,7 @@ A C# client library for the Elgato Stream Deck device.
 This library uses the [streamdeck-client-csharp](https://github.com/TyrenDe/streamdeck-client-csharp) wrapper
 
 ## Current functionality
+- New: Long press (2 seconds) on the key to reset the stopwatch
 - Multiple Stopwatches suppport
 - Stopping/Starting a watch
 - Option to not reset the watch after it's restarted

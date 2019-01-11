@@ -21,7 +21,7 @@
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
   "URL": "https://github.com/BarRaider/streamdeck-stopwatch",
-  "Version": "0.5",
+  "Version": "0.6",
   "CodePath": "stopwatch.exe",
   "Category": "BarRaider",
   "CategoryIcon": "Images/categoryIcon",

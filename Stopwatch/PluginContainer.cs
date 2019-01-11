@@ -29,6 +29,7 @@ namespace Stopwatch
             connection.OnConnected     += Connection_OnConnected;
             connection.OnDisconnected  += Connection_OnDisconnected;
             connection.OnKeyDown       += Connection_OnKeyDown;
+            connection.OnKeyUp         += Connection_OnKeyUp;
             connection.OnWillAppear    += Connection_OnWillAppear;
             connection.OnWillDisappear += Connection_OnWillDisappear;
 
@@ -65,6 +66,24 @@ namespace Stopwatch
                 instancesLock.Release();
             }
         }
+
+        // Button released
+        private async void Connection_OnKeyUp(object sender, StreamDeckEventReceivedEventArgs<KeyUpEvent> e)
+        {
+            await instancesLock.WaitAsync();
+            try
+            {
+                if (instances.ContainsKey(e.Event.Context))
+                {
+                    instances[e.Event.Context].KeyReleased();
+                }
+            }
+            finally
+            {
+                instancesLock.Release();
+            }
+        }
+
 
         // Function runs every second, used to update UI
         private async void RunTick()
