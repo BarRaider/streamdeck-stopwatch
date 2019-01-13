@@ -1,9 +1,6 @@
 # streamdeck-stopwatch
 A C# Stopwatch implementation for the Elgato Stream Deck device.
 
-# streamdeck-client-csharp
-A C# client library for the Elgato Stream Deck device.
-
 ## Dependencies
 This library uses the [streamdeck-client-csharp](https://github.com/TyrenDe/streamdeck-client-csharp) wrapper
 
@@ -18,7 +15,8 @@ This library uses the [streamdeck-client-csharp](https://github.com/TyrenDe/stre
 Always open to more suggestions.
 
 ## How do I get started using it?
-Install by clicking the com.barraider.stopwatch.streamDeckPlugin file in the Install folder.
+Install by clicking the com.barraider.stopwatch.streamDeckPlugin file in the Releases folder:
+https://github.com/BarRaider/streamdeck-stopwatch/releases
 
 ## I found a bug, who do I contact?
 Just head over to the issues page and create a new issue.
