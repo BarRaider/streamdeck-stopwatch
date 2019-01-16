@@ -11,18 +11,18 @@
         }
       ],
       "SupportedInMultiActions": false,
-      "Tooltip": "Stopwatch plugin for Stream Deck",
+      "Tooltip": "Stopwatch implementation with various display and behaviour settings",
       "UUID": "com.barraider.stopwatch",
       "PropertyInspectorPath": "PropertyInspector/Stopwatch/Index.html"
     }
   ],
   "Author": "BarRaider",
-  "Description": "Stopwatch implementation for Stream Deck",
+  "Description": "Stopwatch implementation with various display and behaviour settings",
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
-  "URL": "https://github.com/BarRaider/streamdeck-stopwatch",
-  "Version": "0.6",
-  "CodePath": "stopwatch.exe",
+  "URL": "https://barraider.github.io/",
+  "Version": "1.0",
+  "CodePath": "com.barraider.stopwatch",
   "Category": "BarRaider",
   "CategoryIcon": "Images/categoryIcon",
   "OS": [

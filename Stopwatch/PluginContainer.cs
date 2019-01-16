@@ -149,8 +149,6 @@ namespace Stopwatch
             {
                 instancesLock.Release();
             }
-            System.Diagnostics.Debug.WriteLine($"PLUGIN: {JsonConvert.SerializeObject(e.Event)}");
-
         }
 
         private void Connection_OnConnected(object sender, EventArgs e)

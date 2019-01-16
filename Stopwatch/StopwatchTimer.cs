@@ -56,7 +56,7 @@ namespace Stopwatch
 
         #region Private members
 
-        private const int RESET_COUNTER_KEYPRESS_LENGTH = 2;
+        private const int RESET_COUNTER_KEYPRESS_LENGTH = 1;
 
         private Timer tmrStopwatch;
         private InspectorSettings settings;

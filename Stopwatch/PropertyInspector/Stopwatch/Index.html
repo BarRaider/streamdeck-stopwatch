@@ -10,7 +10,11 @@
 </head>
 <body>
     <div class="sdpi-wrapper">
-        <div  type="checkbox" class="sdpi-item" id="MultilineStopwatch">
+        <details class="message info">
+            <summary>For feedback/suggestions contact me at <a href="https://BarRaider.github.io" target="_blank">https://BarRaider.github.io</a> </summary>
+        </details>
+
+        <div type="checkbox" class="sdpi-item" id="MultilineStopwatch">
             <div class="sdpi-item-label">Multiline</div>
             <div class="sdpi-item-value">
                 <input id="cbMultiline" type="checkbox" value="" oninput="updateSettings()">
@@ -24,8 +28,10 @@
                 <label for="cbClickResume" class="sdpi-item-label"><span></span>Unpausing does not reset</label>
             </div>
         </div>
+        <details class="message">
+            <summary>Long press the key to reset the stopwatch</summary>
+        </details>
     </div>
-
     <script src="../Index.js"></script>
 </body>
 </html>
