@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using BarRaider.SdTools;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -9,9 +10,9 @@ using System.Timers;
 
 namespace Stopwatch
 {
-    public class StopwatchTimer
+    public class StopwatchTimer : IPluginable
     {
-        private class InspectorSettings
+        private class InspectorSettings : SettingsBase
         {
             public static InspectorSettings CreateDefaultSettings()
             {
@@ -22,36 +23,11 @@ namespace Stopwatch
                 return instance;
             }
 
-            public async void SendToPropertyInspectorAsync()
-            {
-                if (StreamDeckConnection != null && !String.IsNullOrEmpty(ContextId) && !String.IsNullOrEmpty(ActionId))
-                {
-                    await StreamDeckConnection.SendToPropertyInspectorAsync(ActionId, JObject.FromObject(this), this.ContextId);
-                }
-            }
-
-            public async void SetSettingsAsync()
-            {
-                if (StreamDeckConnection != null && !String.IsNullOrEmpty(ContextId) && !String.IsNullOrEmpty(ActionId))
-                {
-                    await StreamDeckConnection.SetSettingsAsync(JObject.FromObject(this), this.ContextId);
-                }
-            }
-
             [JsonProperty(PropertyName = "resumeOnClick")]
             public bool ResumeOnClick { get; set; }
 
             [JsonProperty(PropertyName = "multiline")]
             public bool Multiline { get; set; }
-
-            [JsonIgnore]
-            public string ActionId { private get; set; }
-
-            [JsonIgnore]
-            public string ContextId { private get; set; }
-
-            [JsonIgnore]
-            public streamdeck_client_csharp.StreamDeckConnection StreamDeckConnection { private get; set; }
         }
 
         #region Private members
@@ -85,7 +61,7 @@ namespace Stopwatch
             ResetCounter();
         }
 
-        public void TriggerStopwatch()
+        public void KeyPressed()
         {
             // Used for long press
             keyPressStart = DateTime.Now;
@@ -111,7 +87,7 @@ namespace Stopwatch
             keyPressed = false;
         }
 
-        public string GetCurrentStopwatchValue()
+        public void OnTick()
         {
             long total, minutes, seconds, hours;
             string delimiter = settings.Multiline ? "\n" : ":";
@@ -126,7 +102,7 @@ namespace Stopwatch
             hours = minutes / 60;
             minutes = minutes % 60;
 
-            return $"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}\n{seconds.ToString("00")}";
+            settings.SetTitleAsync($"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}\n{seconds.ToString("00")}");
         }
 
         public void UpdateSettings(JObject payload)
@@ -197,6 +173,5 @@ namespace Stopwatch
         }
 
         #endregion
-
     }
 }

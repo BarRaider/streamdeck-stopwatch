@@ -64,6 +64,18 @@ function sendPayloadToPlugin(payload) {
     }
 }
 
+function openWebsite() {
+    if (websocket && (websocket.readyState === 1)) {
+        const json = {
+            'event': 'openUrl',
+            'payload': {
+                'url': 'https://BarRaider.github.io'
+            }
+        };
+        websocket.send(JSON.stringify(json));
+    }
+}
+
 // our method to pass values to the plugin
 function sendValueToPlugin(value, param) {
     if (websocket && (websocket.readyState === 1)) {

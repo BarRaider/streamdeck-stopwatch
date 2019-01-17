@@ -11,17 +11,17 @@
         }
       ],
       "SupportedInMultiActions": false,
-      "Tooltip": "Stopwatch implementation with various display and behaviour settings",
+      "Tooltip": "Stopwatch implementation with various display and behaviour settings.",
       "UUID": "com.barraider.stopwatch",
       "PropertyInspectorPath": "PropertyInspector/Stopwatch/Index.html"
     }
   ],
   "Author": "BarRaider",
-  "Description": "Stopwatch implementation with various display and behaviour settings",
+  "Description": "Stopwatch implementation with various display and behaviour settings.",
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
   "URL": "https://barraider.github.io/",
-  "Version": "1.0",
+  "Version": "1.01",
   "CodePath": "com.barraider.stopwatch",
   "Category": "BarRaider",
   "CategoryIcon": "Images/categoryIcon",

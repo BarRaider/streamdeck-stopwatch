@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using BarRaider.SdTools;
+using Newtonsoft.Json;
 using streamdeck_client_csharp;
 using streamdeck_client_csharp.Events;
 using System;
@@ -18,7 +19,7 @@ namespace Stopwatch
         private SemaphoreSlim instancesLock = new SemaphoreSlim(1);
         
         // Holds all instances of plugin
-        private static Dictionary<string, StopwatchTimer> instances = new Dictionary<string, StopwatchTimer>();
+        private static Dictionary<string, IPluginable> instances = new Dictionary<string, IPluginable>();
 
 
         public void Run(StreamDeckOptions options)
@@ -58,7 +59,7 @@ namespace Stopwatch
             {
                 if (instances.ContainsKey(e.Event.Context))
                 {
-                    instances[e.Event.Context].TriggerStopwatch();
+                    instances[e.Event.Context].KeyPressed();
                 }
             }
             finally
@@ -91,9 +92,9 @@ namespace Stopwatch
             await instancesLock.WaitAsync();
             try
             {
-                foreach (KeyValuePair<string, StopwatchTimer> kvp in instances.ToArray())
+                foreach (KeyValuePair<string, IPluginable> kvp in instances.ToArray())
                 {
-                    _ = connection.SetTitleAsync(kvp.Value.GetCurrentStopwatchValue(), kvp.Key, SDKTarget.HardwareAndSoftware);
+                    kvp.Value.OnTick();
                 }
             }
             finally
