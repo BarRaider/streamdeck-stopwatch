@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A35FB18D-7867-4F77-A9F3-863BF6F18C6F}</ProjectGuid>
+    <ProjectGuid>{13DB264F-BCAC-4082-BAAA-DB2B7689672D}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Stopwatch</RootNamespace>
     <AssemblyName>com.barraider.stopwatch</AssemblyName>

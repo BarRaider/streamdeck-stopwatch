@@ -105,6 +105,11 @@ namespace Stopwatch
             settings.SetTitleAsync($"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}\n{seconds.ToString("00")}");
         }
 
+        public void Dispose()
+        {
+            PauseStopwatch();
+        }
+
         public void UpdateSettings(JObject payload)
         {
             if (payload["property_inspector"] != null)
