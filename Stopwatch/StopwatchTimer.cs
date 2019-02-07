@@ -10,13 +10,13 @@ using System.Timers;
 
 namespace Stopwatch
 {
-    public class StopwatchTimer : IPluginable
+    public class StopwatchTimer : PluginBase
     {
-        private class InspectorSettings : SettingsBase
+        private class PluginSettings
         {
-            public static InspectorSettings CreateDefaultSettings()
+            public static PluginSettings CreateDefaultSettings()
             {
-                InspectorSettings instance = new InspectorSettings();
+                PluginSettings instance = new PluginSettings();
                 instance.ResumeOnClick = false;
                 instance.Multiline = false;
 
@@ -35,7 +35,7 @@ namespace Stopwatch
         private const int RESET_COUNTER_KEYPRESS_LENGTH = 1;
 
         private Timer tmrStopwatch;
-        private InspectorSettings settings;
+        private PluginSettings settings;
         private bool keyPressed = false;
         private DateTime keyPressStart;
         private long stopwatchSeconds;
@@ -44,24 +44,20 @@ namespace Stopwatch
 
         #region Public Methods
 
-        public StopwatchTimer(streamdeck_client_csharp.StreamDeckConnection connection, string action, string context, JObject settings)
+        public StopwatchTimer(SDConnection connection, JObject settings) : base(connection, settings)
         {
             if (settings == null || settings.Count == 0)
             {
-                this.settings = InspectorSettings.CreateDefaultSettings();
+                this.settings = PluginSettings.CreateDefaultSettings();
             }
             else
             {
-                this.settings = settings.ToObject<InspectorSettings>();
+                this.settings = settings.ToObject<PluginSettings>();
             }
-
-            this.settings.StreamDeckConnection = connection;
-            this.settings.ActionId = action;
-            this.settings.ContextId = context;
             ResetCounter();
         }
 
-        public void KeyPressed()
+        public override void KeyPressed()
         {
             // Used for long press
             keyPressStart = DateTime.Now;
@@ -82,12 +78,12 @@ namespace Stopwatch
             }
         }
 
-        public void KeyReleased()
+        public override void KeyReleased()
         {
             keyPressed = false;
         }
 
-        public void OnTick()
+        public async override void OnTick()
         {
             long total, minutes, seconds, hours;
             string delimiter = settings.Multiline ? "\n" : ":";
@@ -102,32 +98,32 @@ namespace Stopwatch
             hours = minutes / 60;
             minutes = minutes % 60;
 
-            settings.SetTitleAsync($"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}\n{seconds.ToString("00")}");
+            await Connection.SetTitleAsync($"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}\n{seconds.ToString("00")}");
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             PauseStopwatch();
         }
 
-        public void UpdateSettings(JObject payload)
+        public async override void UpdateSettings(JObject payload)
         {
             if (payload["property_inspector"] != null)
             {
                 switch (payload["property_inspector"].ToString().ToLower())
                 {
                     case "propertyinspectorconnected":
-                        settings.SendToPropertyInspectorAsync();
+                        await Connection.SendToPropertyInspectorAsync(JObject.FromObject(settings));
                         break;
 
                     case "propertyinspectorwilldisappear":
-                        settings.SetSettingsAsync();
+                        await Connection.SetSettingsAsync(JObject.FromObject(settings));
                         break;
 
                     case "updatesettings":
                         settings.Multiline = (bool)payload["multiline"];
                         settings.ResumeOnClick = (bool)payload["resumeOnClick"];
-                        settings.SetSettingsAsync();
+                        await Connection.SetSettingsAsync(JObject.FromObject(settings));
                         break;
                 }
             }
