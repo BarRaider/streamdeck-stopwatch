@@ -74,6 +74,8 @@ namespace Stopwatch
             keyPressStart = DateTime.Now;
             keyPressed = true;
 
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
+
             if (tmrStopwatch != null && tmrStopwatch.Enabled)
             {
                 PauseStopwatch();
@@ -92,6 +94,7 @@ namespace Stopwatch
         public override void KeyReleased(KeyPayload payload)
         {
             keyPressed = false;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
         }
 
         public async override void OnTick()
@@ -114,7 +117,7 @@ namespace Stopwatch
 
         public override void Dispose()
         {
-            PauseStopwatch();
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Destructor called");
         }
 
         #endregion
