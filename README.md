@@ -19,7 +19,11 @@ Install by clicking the com.barraider.stopwatch.streamDeckPlugin file in the Rel
 https://github.com/BarRaider/streamdeck-stopwatch/releases
 
 ## I found a bug, who do I contact?
-Just head over to the issues page and create a new issue.
+For support please contact the developer. Contact information is available at https://barraider.github.io
+
+## I have a feature request, who do I contact?
+Please contact the developer. Contact information is available at https://barraider.github.io
+
 
 ## License
 MIT License
