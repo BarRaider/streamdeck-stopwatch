@@ -10,6 +10,7 @@ using System.Timers;
 
 namespace Stopwatch
 {
+    [PluginActionId("com.barraider.stopwatch")]
     public class StopwatchTimer : PluginBase
     {
         private class PluginSettings
@@ -42,22 +43,32 @@ namespace Stopwatch
 
         #endregion
 
-        #region Public Methods
+        #region PluginBase Methods
 
-        public StopwatchTimer(SDConnection connection, JObject settings) : base(connection, settings)
+        public StopwatchTimer(SDConnection connection, InitialPayload payload) : base(connection, payload)
         {
-            if (settings == null || settings.Count == 0)
+            if (payload.Settings == null || payload.Settings.Count == 0)
             {
                 this.settings = PluginSettings.CreateDefaultSettings();
             }
             else
             {
-                this.settings = settings.ToObject<PluginSettings>();
+                this.settings = payload.Settings.ToObject<PluginSettings>();
             }
             ResetCounter();
         }
 
-        public override void KeyPressed()
+        public override void ReceivedSettings(ReceivedSettingsPayload payload)
+        {
+            // New in StreamDeck-Tools v2.0:
+            Tools.AutoPopulateSettings(settings, payload.Settings);
+        }
+
+        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
+        {}
+
+
+        public override void KeyPressed(KeyPayload payload)
         {
             // Used for long press
             keyPressStart = DateTime.Now;
@@ -78,7 +89,7 @@ namespace Stopwatch
             }
         }
 
-        public override void KeyReleased()
+        public override void KeyReleased(KeyPayload payload)
         {
             keyPressed = false;
         }
@@ -104,29 +115,6 @@ namespace Stopwatch
         public override void Dispose()
         {
             PauseStopwatch();
-        }
-
-        public async override void UpdateSettings(JObject payload)
-        {
-            if (payload["property_inspector"] != null)
-            {
-                switch (payload["property_inspector"].ToString().ToLower())
-                {
-                    case "propertyinspectorconnected":
-                        await Connection.SendToPropertyInspectorAsync(JObject.FromObject(settings));
-                        break;
-
-                    case "propertyinspectorwilldisappear":
-                        await Connection.SetSettingsAsync(JObject.FromObject(settings));
-                        break;
-
-                    case "updatesettings":
-                        settings.Multiline = (bool)payload["multiline"];
-                        settings.ResumeOnClick = (bool)payload["resumeOnClick"];
-                        await Connection.SetSettingsAsync(JObject.FromObject(settings));
-                        break;
-                }
-            }
         }
 
         #endregion
@@ -172,7 +160,6 @@ namespace Stopwatch
         {
             tmrStopwatch.Stop();
         }
-
         #endregion
     }
 }

@@ -1,76 +1,102 @@
 ﻿var websocket = null,
     uuid = null,
+    registerEventName = null,
     actionInfo = {},
     inInfo = {},
     runningApps = [],
     isQT = navigator.appVersion.includes('QtWebEngine');
 
-function connectSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
     uuid = inUUID;
+    registerEventName = inRegisterEvent;
     actionInfo = JSON.parse(inActionInfo); // cache the info
     inInfo = JSON.parse(inInfo);
     websocket = new WebSocket('ws://localhost:' + inPort);
 
     addDynamicStyles(inInfo.colors);
 
-    websocket.onopen = function () {
-        var json = {
-            event: inRegisterEvent,
-            uuid: inUUID
-        };
-
-        websocket.send(JSON.stringify(json));
-
-        // Notify the plugin that we are connected
-        sendValueToPlugin('propertyInspectorConnected', 'property_inspector');
-    };
-
-    websocket.onmessage = function (evt) {
-        // Received message from Stream Deck
-        var jsonObj = JSON.parse(evt.data);
-
-        if (jsonObj.event === 'sendToPropertyInspector') {
-            var payload = jsonObj.payload;
-
-            var multiline = document.getElementById('cbMultiline');
-            multiline.checked = payload['multiline'];
-
-            var resumeOnClick = document.getElementById('cbClickResume');
-            resumeOnClick.checked = payload['resumeOnClick'];
-        }
-    };
+    websocket.onopen = websocketOnOpen;
+    websocket.onmessage = websocketOnMessage;
+    loadConfiguration(actionInfo.payload.settings);
 }
 
-function updateSettings() {
-    var multiline = document.getElementById('cbMultiline');
-    var resumeOnClick = document.getElementById('cbClickResume');
+function websocketOnOpen() {
+    var json = {
+        event: registerEventName,
+        uuid: uuid
+    };
+    websocket.send(JSON.stringify(json));
 
-    var payload = {};
-    payload.property_inspector = 'updateSettings';
-    payload.multiline = multiline.checked;
-    payload.resumeOnClick = resumeOnClick.checked;
-    sendPayloadToPlugin(payload);
+    // Notify the plugin that we are connected
+    sendValueToPlugin('propertyInspectorConnected', 'property_inspector');
 }
 
-function sendPayloadToPlugin(payload) {
-    if (websocket && (websocket.readyState === 1)) {
-        const json = {
-            'action': actionInfo['action'],
-            'event': 'sendToPlugin',
-            'context': uuid,
-            'payload': payload
-        };
-        websocket.send(JSON.stringify(json));
+function websocketOnMessage(evt) {
+    // Received message from Stream Deck
+    var jsonObj = JSON.parse(evt.data);
+
+    if (jsonObj.event === 'sendToPropertyInspector') {
+        var payload = jsonObj.payload;
+        loadConfiguration(payload);
+    }
+    else if (jsonObj.event === 'didReceiveSettings') {
+        var payload = jsonObj.payload;
+        loadConfiguration(payload.settings);
+    }
+    else {
+        console.log("Unhandled websocketOnMessage: " + jsonObj.event);
     }
 }
 
-function openWebsite() {
+function loadConfiguration(payload) {
+    console.log('loadConfiguration');
+    console.log(payload);
+    for (var key in payload) {
+        try {
+            var elem = document.getElementById(key);
+            if (elem.classList.contains("sdCheckbox")) { // Checkbox
+                elem.checked = payload[key];
+            }
+            else if (elem.classList.contains("sdFile")) { // File
+
+            }
+            else { // Normal value
+                elem.value = payload[key];
+            }
+            console.log("Load: " + key + "=" + payload[key]);
+        }
+        catch (err) {
+            console.log("loadConfiguration failed for key: " + key + " - " + err);
+        }
+    }
+}
+
+function setSettings() {
+    var payload = {};
+    var elements = document.getElementsByClassName("sdProperty");
+
+    Array.prototype.forEach.call(elements, function (elem) {
+        var key = elem.id;
+        if (elem.classList.contains("sdCheckbox")) { // Checkbox
+            payload[key] = elem.checked;
+        }
+        else if (elem.classList.contains("sdFile")) { // File
+
+        }
+        else { // Normal value
+            payload[key] = elem.value;
+        }
+        console.log("Save: " + key + "<=" + payload[key]);
+    });
+    setSettingsToPlugin(payload);
+}
+
+function setSettingsToPlugin(payload) {
     if (websocket && (websocket.readyState === 1)) {
         const json = {
-            'event': 'openUrl',
-            'payload': {
-                'url': 'https://BarRaider.github.io'
-            }
+            'event': 'setSettings',
+            'context': uuid,
+            'payload': payload
         };
         websocket.send(JSON.stringify(json));
     }
@@ -91,6 +117,18 @@ function sendValueToPlugin(value, param) {
     }
 }
 
+function openWebsite() {
+    if (websocket && (websocket.readyState === 1)) {
+        const json = {
+            'event': 'openUrl',
+            'payload': {
+                'url': 'https://BarRaider.github.io'
+            }
+        };
+        websocket.send(JSON.stringify(json));
+    }
+}
+
 if (!isQT) {
     document.addEventListener('DOMContentLoaded', function () {
         initPropertyInspector();
@@ -105,6 +143,11 @@ window.addEventListener('beforeunload', function (e) {
 
     // Don't set a returnValue to the event, otherwise Chromium with throw an error.
 });
+
+function initPropertyInspector() {
+    // Place to add functions
+}
+
 
 function addDynamicStyles(clrs) {
     const node = document.getElementById('#sdpi-dynamic-styles') || document.createElement('style');
