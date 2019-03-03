@@ -50,6 +50,7 @@ namespace Stopwatch
             if (payload.Settings == null || payload.Settings.Count == 0)
             {
                 this.settings = PluginSettings.CreateDefaultSettings();
+                Connection.SetSettingsAsync(JObject.FromObject(settings));
             }
             else
             {
