@@ -35,11 +35,10 @@ namespace Stopwatch
 
         private const int RESET_COUNTER_KEYPRESS_LENGTH = 1;
 
-        private Timer tmrStopwatch;
         private PluginSettings settings;
         private bool keyPressed = false;
         private DateTime keyPressStart;
-        private long stopwatchSeconds;
+        private string stopwatchId;
 
         #endregion
 
@@ -56,7 +55,7 @@ namespace Stopwatch
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
-            ResetCounter();
+            stopwatchId = Connection.ContextId;
         }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
@@ -77,7 +76,7 @@ namespace Stopwatch
 
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
 
-            if (tmrStopwatch != null && tmrStopwatch.Enabled)
+            if (StopwatchManager.Instance.IsStopwatchEnabled(stopwatchId))
             {
                 PauseStopwatch();
             }
@@ -107,7 +106,7 @@ namespace Stopwatch
             // so this is the best place to determine if we need to reset (versus the internal timer which may be paused)
             CheckIfResetNeeded();
 
-            total = stopwatchSeconds;
+            total = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
             minutes = total / 60;
             seconds = total % 60;
             hours = minutes / 60;
@@ -127,18 +126,13 @@ namespace Stopwatch
 
         private void ResetCounter()
         {
-            stopwatchSeconds = 0;
+            StopwatchManager.Instance.ResetStopwatch(stopwatchId);
         }
 
         private void ResumeStopwatch()
         {
-            if (tmrStopwatch is null)
-            {
-                tmrStopwatch = new Timer();
-                tmrStopwatch.Elapsed += TmrStopwatch_Elapsed;
-            }
-            tmrStopwatch.Interval = 1000;
-            tmrStopwatch.Start();
+            bool reset = !settings.ResumeOnClick;
+            StopwatchManager.Instance.StartStopwatch(stopwatchId, reset);
         }
 
         private void CheckIfResetNeeded()
@@ -154,15 +148,10 @@ namespace Stopwatch
                 ResetCounter();
             }
         }
-
-        private void TmrStopwatch_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            stopwatchSeconds++;
-        }
-
+        
         private void PauseStopwatch()
         {
-            tmrStopwatch.Stop();
+            Stopwatch.StopwatchManager.Instance.StopStopwatch(stopwatchId);
         }
         #endregion
     }

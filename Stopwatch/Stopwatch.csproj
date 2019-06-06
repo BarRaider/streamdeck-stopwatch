@@ -69,6 +69,8 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StopwatchManager.cs" />
+    <Compile Include="StopwatchStatus.cs" />
     <Compile Include="StopwatchTimer.cs" />
   </ItemGroup>
   <ItemGroup>
