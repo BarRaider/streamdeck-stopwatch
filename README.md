@@ -3,6 +3,9 @@ A C# Stopwatch implementation for the Elgato Stream Deck device.
 
 **Author's website and contact information:** [https://barraider.github.io](https://barraider.github.io)
 
+## New in v1.3
+- Time is written to file so you can display the elapsed time on your stream
+
 ## New in v1.2
 - Stopwatches now continue to count even when moving between Stream Deck profiles. 
 

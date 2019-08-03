@@ -11,15 +11,18 @@ using System.Timers;
 namespace Stopwatch
 {
     [PluginActionId("com.barraider.stopwatch")]
-    public class StopwatchTimer : PluginBase
+    public class StopwatchTimerAction : PluginBase
     {
         private class PluginSettings
         {
             public static PluginSettings CreateDefaultSettings()
             {
-                PluginSettings instance = new PluginSettings();
-                instance.ResumeOnClick = false;
-                instance.Multiline = false;
+                PluginSettings instance = new PluginSettings
+                {
+                    ResumeOnClick = false,
+                    Multiline = false,
+                    FileName = String.Empty
+                };
 
                 return instance;
             }
@@ -29,6 +32,10 @@ namespace Stopwatch
 
             [JsonProperty(PropertyName = "multiline")]
             public bool Multiline { get; set; }
+
+            [JsonProperty(PropertyName = "fileName")]
+            public string FileName { get; set; }
+           
         }
 
         #region Private members
@@ -44,7 +51,7 @@ namespace Stopwatch
 
         #region PluginBase Methods
 
-        public StopwatchTimer(SDConnection connection, InitialPayload payload) : base(connection, payload)
+        public StopwatchTimerAction(SDConnection connection, InitialPayload payload) : base(connection, payload)
         {
             if (payload.Settings == null || payload.Settings.Count == 0)
             {
@@ -126,13 +133,13 @@ namespace Stopwatch
 
         private void ResetCounter()
         {
-            StopwatchManager.Instance.ResetStopwatch(stopwatchId);
+            StopwatchManager.Instance.ResetStopwatch(stopwatchId, settings.FileName);
         }
 
         private void ResumeStopwatch()
         {
             bool reset = !settings.ResumeOnClick;
-            StopwatchManager.Instance.StartStopwatch(stopwatchId, reset);
+            StopwatchManager.Instance.StartStopwatch(stopwatchId, reset, settings.FileName);
         }
 
         private void CheckIfResetNeeded()

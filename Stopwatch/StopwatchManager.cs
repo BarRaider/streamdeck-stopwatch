@@ -1,5 +1,7 @@
-﻿using System;
+﻿using BarRaider.SdTools;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,16 +54,17 @@ namespace Stopwatch
 
         #region Public Methods
 
-        public void StartStopwatch(string stopwatchId, bool resetOnStart)
+        public void StartStopwatch(string stopwatchId, bool resetOnStart, string fileName)
         {
             if (!dicCounters.ContainsKey(stopwatchId))
             {
                 dicCounters[stopwatchId] = new StopwatchStatus();
             }
 
+            dicCounters[stopwatchId].Filename = fileName;
             if (resetOnStart)
             {
-                ResetStopwatch(stopwatchId);
+                ResetStopwatch(stopwatchId, fileName);
             }
             dicCounters[stopwatchId].IsEnabled = true;
         }
@@ -74,13 +77,14 @@ namespace Stopwatch
             }
         }
 
-        public void ResetStopwatch(string stopwatchId)
+        public void ResetStopwatch(string stopwatchId, string fileName)
         {
             if (!dicCounters.ContainsKey(stopwatchId))
             {
                 dicCounters[stopwatchId] = new StopwatchStatus();
             }
             dicCounters[stopwatchId].Counter = 0;
+            dicCounters[stopwatchId].Filename = fileName;
         }
 
         public long GetStopwatchTime(string stopwatchId)
@@ -112,7 +116,45 @@ namespace Stopwatch
                 if (dicCounters[key].IsEnabled)
                 {
                     dicCounters[key].Counter++;
+                    WriteTimerToFile(key);
                 }
+            }
+        }
+
+        private void WriteTimerToFile(string counterKey)
+        {
+            long total, minutes, seconds, hours;
+            var stopwatchDate = dicCounters[counterKey];
+
+            if (String.IsNullOrEmpty(stopwatchDate.Filename))
+            {
+                return;
+            }
+
+
+            total = stopwatchDate.Counter;
+            minutes = total / 60;
+            seconds = total % 60;
+            hours = minutes / 60;
+            minutes %= 60;
+
+            string hoursStr = (hours > 0) ? $"{hours.ToString("00")}:" : "";
+            SaveTimerToFile(stopwatchDate.Filename, $"{hoursStr}{minutes.ToString("00")}:{seconds.ToString("00")}");
+        }
+
+        private void SaveTimerToFile(string fileName, string text)
+        {
+            try
+            {
+                if (!String.IsNullOrWhiteSpace(fileName))
+                {
+
+                    File.WriteAllText(fileName, text);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Error Saving value: {text} to counter file: {fileName} : {ex}");
             }
         }
 
