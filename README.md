@@ -6,12 +6,10 @@ A C# Stopwatch implementation for the Elgato Stream Deck device.
 ## New in v1.3
 - Time is written to file so you can display the elapsed time on your stream
 
-## New in v1.2
-- Stopwatches now continue to count even when moving between Stream Deck profiles. 
-
 ## Current functionality
 - New: Long press (2 seconds) on the key to reset the stopwatch
 - Multiple Stopwatches suppport
+- Stopwatches now continue to count even when moving between Stream Deck profiles. 
 - Stopping/Starting a watch
 - Option to not reset the watch after it's restarted
 - Two display styles
