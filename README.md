@@ -3,8 +3,9 @@ A C# Stopwatch implementation for the Elgato Stream Deck device.
 
 **Author's website and contact information:** [https://barraider.github.io](https://barraider.github.io)
 
-## New in v1.3
-- Time is written to file so you can display the elapsed time on your stream
+## New in v1.5
+- Time is written to a file of your choice so you can display the elapsed time on your stream
+- File is now created immediatly when you press the "Save" button
 
 ## Current functionality
 - New: Long press (2 seconds) on the key to reset the stopwatch

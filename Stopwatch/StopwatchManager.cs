@@ -15,8 +15,8 @@ namespace Stopwatch
         private static StopwatchManager instance = null;
         private static readonly object objLock = new object();
 
-        private Dictionary<string, StopwatchStatus> dicCounters = new Dictionary<string, StopwatchStatus>();
-        private Timer tmrStopwatchCounter;
+        private readonly Dictionary<string, StopwatchStatus> dicCounters = new Dictionary<string, StopwatchStatus>();
+        private readonly Timer tmrStopwatchCounter;
 
         #endregion
 
@@ -44,8 +44,10 @@ namespace Stopwatch
 
         private StopwatchManager()
         {
-            tmrStopwatchCounter = new Timer();
-            tmrStopwatchCounter.Interval = 1000;
+            tmrStopwatchCounter = new Timer
+            {
+                Interval = 1000
+            };
             tmrStopwatchCounter.Elapsed += TmrStopwatchCounter_Elapsed;
             tmrStopwatchCounter.Start();
         }
@@ -103,6 +105,11 @@ namespace Stopwatch
                 return false;
             }
             return dicCounters[stopwatchId].IsEnabled;
+        }
+
+        public void TouchTimerFile(string filename)
+        {
+            SaveTimerToFile(filename, "00:00");
         }
 
         #endregion

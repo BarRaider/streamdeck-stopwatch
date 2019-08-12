@@ -42,10 +42,10 @@ namespace Stopwatch
 
         private const int RESET_COUNTER_KEYPRESS_LENGTH = 1;
 
-        private PluginSettings settings;
+        private readonly PluginSettings settings;
         private bool keyPressed = false;
         private DateTime keyPressStart;
-        private string stopwatchId;
+        private readonly string stopwatchId;
 
         #endregion
 
@@ -67,8 +67,14 @@ namespace Stopwatch
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
+            string fileName = settings.FileName;
             // New in StreamDeck-Tools v2.0:
             Tools.AutoPopulateSettings(settings, payload.Settings);
+
+            if (fileName != settings.FileName)
+            {
+                StopwatchManager.Instance.TouchTimerFile(settings.FileName);
+            }
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
@@ -117,7 +123,7 @@ namespace Stopwatch
             minutes = total / 60;
             seconds = total % 60;
             hours = minutes / 60;
-            minutes = minutes % 60;
+            minutes %= 60;
 
             await Connection.SetTitleAsync($"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}\n{seconds.ToString("00")}");
         }

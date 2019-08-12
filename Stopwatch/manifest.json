@@ -17,11 +17,11 @@
     }
   ],
   "Author": "BarRaider",
-  "Description": "Stopwatch implementation with various display and behaviour settings.\nNew: Time is written to a file of your choice so you can display the elapsed time on your stream",
+  "Description": "Stopwatch implementation with various display and behaviour settings.\nNew: Time is written to a file of your choice so you can display the elapsed time on your stream.",
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
   "URL": "https://barraider.github.io/",
-  "Version": "1.3",
+  "Version": "1.4",
   "CodePath": "com.barraider.stopwatch",
   "Category": "BarRaider",
   "CategoryIcon": "Images/categoryIcon",
