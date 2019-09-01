@@ -3,6 +3,10 @@ A C# Stopwatch implementation for the Elgato Stream Deck device.
 
 **Author's website and contact information:** [https://barraider.github.io](https://barraider.github.io)
 
+## New in v1.6
+- `Clear file on reset` mode is awesome for making the text "Disappear" from the stream on reset
+- :new: `Lap Mode` - Every press records the timestamp when pressed. A long press will reset the timer and copy all the laps to the clipboard (`Ctrl-V` to see them)
+
 ## New in v1.5
 - Time is written to a file of your choice so you can display the elapsed time on your stream
 - File is now created immediately when you press the "Save" button

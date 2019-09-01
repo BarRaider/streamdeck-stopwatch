@@ -56,19 +56,14 @@ namespace Stopwatch
 
         #region Public Methods
 
-        public void StartStopwatch(string stopwatchId, bool resetOnStart, string fileName)
+        public void StartStopwatch(StopwatchSettings settings)
         {
-            if (!dicCounters.ContainsKey(stopwatchId))
+            InitializeStopwatch(settings);
+            if (settings.ResetOnStart)
             {
-                dicCounters[stopwatchId] = new StopwatchStatus();
+                ResetStopwatch(settings);
             }
-
-            dicCounters[stopwatchId].Filename = fileName;
-            if (resetOnStart)
-            {
-                ResetStopwatch(stopwatchId, fileName);
-            }
-            dicCounters[stopwatchId].IsEnabled = true;
+            dicCounters[settings.StopwatchId].IsEnabled = true;
         }
 
         public void StopStopwatch(string stopwatchId)
@@ -79,14 +74,27 @@ namespace Stopwatch
             }
         }
 
-        public void ResetStopwatch(string stopwatchId, string fileName)
+        public void ResetStopwatch(StopwatchSettings settings)
         {
-            if (!dicCounters.ContainsKey(stopwatchId))
+            InitializeStopwatch(settings);
+            dicCounters[settings.StopwatchId].Counter = 0;
+            dicCounters[settings.StopwatchId].Laps.Clear();
+
+            // Clear file contents
+            if (settings.ClearFileOnReset)
             {
-                dicCounters[stopwatchId] = new StopwatchStatus();
+                SaveTimerToFile(settings.FileName, "");
             }
-            dicCounters[stopwatchId].Counter = 0;
-            dicCounters[stopwatchId].Filename = fileName;
+        }
+
+        public void RecordLap(string stopwatchId)
+        {
+            dicCounters[stopwatchId].Laps.Add(dicCounters[stopwatchId].Counter);
+        }
+
+        public List<long> GetLaps(string stopwatchId)
+        {
+            return dicCounters[stopwatchId].Laps;
         }
 
         public long GetStopwatchTime(string stopwatchId)
@@ -163,6 +171,19 @@ namespace Stopwatch
             {
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"Error Saving value: {text} to counter file: {fileName} : {ex}");
             }
+        }
+
+        private void InitializeStopwatch(StopwatchSettings settings)
+        {
+            string stopwatchId = settings.StopwatchId;
+            if (!dicCounters.ContainsKey(stopwatchId))
+            {
+                dicCounters[stopwatchId] = new StopwatchStatus();
+            }
+
+            dicCounters[stopwatchId].Filename = settings.FileName;
+            dicCounters[stopwatchId].ClearFileOnReset = settings.ClearFileOnReset;
+            dicCounters[stopwatchId].LapMode = settings.LapMode;
         }
 
         #endregion

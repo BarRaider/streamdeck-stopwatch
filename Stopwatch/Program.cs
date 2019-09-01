@@ -7,6 +7,7 @@ namespace Stopwatch
 {
     class Program
     {
+        [STAThreadAttribute]
         static void Main(string[] args)
         {
             // Uncomment this line of code to allow for debugging

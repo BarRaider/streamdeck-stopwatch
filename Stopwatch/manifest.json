@@ -21,7 +21,7 @@
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
   "URL": "https://barraider.github.io/",
-  "Version": "1.5",
+  "Version": "1.6",
   "CodePath": "com.barraider.stopwatch",
   "Category": "BarRaider",
   "CategoryIcon": "Images/categoryIcon",
