@@ -20,7 +20,7 @@
   "Description": "Stopwatch implementation with various display and behaviour settings.\nNew: Time is written to a file of your choice so you can display the elapsed time on your stream.",
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
-  "URL": "https://barraider.github.io/",
+  "URL": "https://BarRaider.com/",
   "Version": "1.6",
   "CodePath": "com.barraider.stopwatch",
   "Category": "BarRaider",
