@@ -180,7 +180,7 @@ namespace Stopwatch
 
                     foreach (TimeSpan lap in laps)
                     {
-                        lapStr.Add(TimeSpanToReadableFormat(lap, ":", false));
+                        lapStr.Add(TimeSpanToReadableFormat(lap, ":"));
                     }
                     SaveToClipboard(string.Join("\n", lapStr.ToArray()));
                 }
@@ -211,9 +211,9 @@ namespace Stopwatch
             Stopwatch.StopwatchManager.Instance.StopStopwatch(stopwatchId);
         }
 
-        private string TimeSpanToReadableFormat(TimeSpan ts, string delimiter, bool secondsOnNewLine)
+        private string TimeSpanToReadableFormat(TimeSpan ts, string delimiter)
         {
-            return $"{ts.Hours:00}{delimiter}{ts.Minutes:00}{(secondsOnNewLine ? "\n" : delimiter)}{ts.Seconds:00}";
+            return $"{ts.Hours:00}{delimiter}{ts.Minutes:00}{delimiter}{ts.Seconds:00}";
         }
 
         private async void TmrOnTick_Elapsed(object sender, ElapsedEventArgs e)
@@ -225,7 +225,7 @@ namespace Stopwatch
             CheckIfResetNeeded();
 
             TimeSpan ts = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
-            await Connection.SetTitleAsync(TimeSpanToReadableFormat(ts, delimiter, true));
+            await Connection.SetTitleAsync(TimeSpanToReadableFormat(ts, delimiter));
         }
 
         #endregion
