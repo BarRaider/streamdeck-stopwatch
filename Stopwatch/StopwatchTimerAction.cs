@@ -175,16 +175,16 @@ namespace Stopwatch
                 PauseStopwatch();
                 if (settings.LapMode)
                 {
-                    List<long> laps = StopwatchManager.Instance.GetLaps(stopwatchId);
+                    List<TimeSpan> laps = StopwatchManager.Instance.GetLaps(stopwatchId);
                     List<string> lapStr = new List<string>();
 
-                    foreach (long lap in laps)
+                    foreach (TimeSpan lap in laps)
                     {
-                        lapStr.Add(SecondsToReadableFormat(lap, ":", false));
+                        lapStr.Add(TimeSpanToReadableFormat(lap, ":", false));
                     }
                     SaveToClipboard(string.Join("\n", lapStr.ToArray()));
-
                 }
+
                 ResetCounter();
             }
         }
@@ -211,15 +211,9 @@ namespace Stopwatch
             Stopwatch.StopwatchManager.Instance.StopStopwatch(stopwatchId);
         }
 
-        private string SecondsToReadableFormat(long total, string delimiter, bool secondsOnNewLine)
+        private string TimeSpanToReadableFormat(TimeSpan ts, string delimiter, bool secondsOnNewLine)
         {
-            long minutes, seconds, hours;
-            minutes = total / 60;
-            seconds = total % 60;
-            hours = minutes / 60;
-            minutes %= 60;
-
-            return $"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}{(secondsOnNewLine ? "\n" : delimiter)}{seconds.ToString("00")}";
+            return $"{ts.Hours:00}{delimiter}{ts.Minutes:00}{(secondsOnNewLine ? "\n" : delimiter)}{ts.Seconds:00}";
         }
 
         private async void TmrOnTick_Elapsed(object sender, ElapsedEventArgs e)
@@ -230,8 +224,8 @@ namespace Stopwatch
             // so this is the best place to determine if we need to reset (versus the internal timer which may be paused)
             CheckIfResetNeeded();
 
-            long total = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
-            await Connection.SetTitleAsync(SecondsToReadableFormat(total, delimiter, true));
+            TimeSpan ts = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
+            await Connection.SetTitleAsync(TimeSpanToReadableFormat(ts, delimiter, true));
         }
 
         #endregion
