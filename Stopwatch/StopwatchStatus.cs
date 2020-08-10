@@ -9,7 +9,7 @@ namespace Stopwatch
 {
     public class StopwatchStatus
     {
-        public System.Diagnostics.Stopwatch Stopwatch { get; set; }
+        public StopwatchWithOffset Stopwatch { get; set; }
 
         public string Filename { get; set; }
 
@@ -21,7 +21,7 @@ namespace Stopwatch
 
         public StopwatchStatus()
         {
-            Stopwatch = new System.Diagnostics.Stopwatch();
+            Stopwatch = new StopwatchWithOffset(new TimeSpan(0));
             Filename = String.Empty;
             ClearFileOnReset = false;
             Laps = new List<TimeSpan>();

@@ -73,6 +73,7 @@
     <Compile Include="StopwatchSettings.cs" />
     <Compile Include="StopwatchStatus.cs" />
     <Compile Include="StopwatchTimerAction.cs" />
+    <Compile Include="StopwatchWithOffset.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

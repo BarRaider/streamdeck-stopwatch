@@ -205,7 +205,6 @@ namespace Stopwatch
             t.Join();
         }
 
-        
         private void PauseStopwatch()
         {
             Stopwatch.StopwatchManager.Instance.StopStopwatch(stopwatchId);
