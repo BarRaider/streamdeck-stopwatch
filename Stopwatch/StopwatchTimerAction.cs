@@ -216,7 +216,7 @@ namespace Stopwatch
 
         private string TimeSpanToReadableFormat(TimeSpan ts, string delimiter)
         {
-            return $"{ts.Hours:00}{delimiter}{ts.Minutes:00}{delimiter}{ts.Seconds:00}";
+            return $"{(int)ts.TotalHours:00}{delimiter}{ts.Minutes:00}{delimiter}{ts.Seconds:00}";
         }
 
         private async void TmrOnTick_Elapsed(object sender, ElapsedEventArgs e)

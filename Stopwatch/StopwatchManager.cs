@@ -146,7 +146,7 @@ namespace Stopwatch
             }
 
             TimeSpan ts = stopwatchDate.Stopwatch.Elapsed;
-            SaveTimerToFile(stopwatchDate.Filename, $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}");
+            SaveTimerToFile(stopwatchDate.Filename, $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}");
         }
 
         private void SaveTimerToFile(string fileName, string text)
