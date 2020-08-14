@@ -31,7 +31,8 @@ namespace Stopwatch
                     Multiline = false,
                     ClearFileOnReset = false,
                     LapMode = false,
-                    FileName = String.Empty
+                    FileName = String.Empty,
+                    StartTime = "00:00:00"
                 };
 
                 return instance;
@@ -45,6 +46,9 @@ namespace Stopwatch
 
             [JsonProperty(PropertyName = "fileName")]
             public string FileName { get; set; }
+
+            [JsonProperty(PropertyName = "startTime")]
+            public string StartTime { get; set; }
 
             [JsonProperty(PropertyName = "clearFileOnReset")]
             public bool ClearFileOnReset { get; set; }
@@ -94,7 +98,7 @@ namespace Stopwatch
 
             if (fileName != settings.FileName)
             {
-                StopwatchManager.Instance.TouchTimerFile(settings.FileName);
+                StopwatchManager.Instance.TouchTimerFile(settings.FileName, settings.StartTime);
             }
         }
 
@@ -153,12 +157,12 @@ namespace Stopwatch
 
         private void ResetCounter()
         {
-            StopwatchManager.Instance.ResetStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
+            StopwatchManager.Instance.ResetStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, StartTime = settings.StartTime, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
         }
 
         private void ResumeStopwatch()
         {
-            StopwatchManager.Instance.StartStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
+            StopwatchManager.Instance.StartStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, StartTime = settings.StartTime, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
         }
 
         private void CheckIfResetNeeded()

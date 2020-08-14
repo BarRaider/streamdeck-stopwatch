@@ -83,7 +83,7 @@ namespace Stopwatch
             // Clear file contents
             if (settings.ClearFileOnReset)
             {
-                SaveTimerToFile(settings.FileName, "");
+                SaveTimerToFile(settings.FileName, "00:00:00");
             }
         }
 
@@ -116,9 +116,9 @@ namespace Stopwatch
             return dicCounters[stopwatchId].Stopwatch.IsRunning;
         }
 
-        public void TouchTimerFile(string filename)
+        public void TouchTimerFile(string filename, string startTime)
         {
-            SaveTimerToFile(filename, "00:00:00");
+            SaveTimerToFile(filename, startTime);
         }
 
         #endregion
@@ -170,6 +170,21 @@ namespace Stopwatch
             if (!dicCounters.ContainsKey(stopwatchId))
             {
                 dicCounters[stopwatchId] = new StopwatchStatus();
+
+                var times = settings.StartTime.Split(':');
+                if (!int.TryParse(times[0], out int hours))
+                {
+                    hours = 0;
+                }
+                if (!int.TryParse(times[1], out int minutes))
+                {
+                    minutes = 0;
+                }
+                if (!int.TryParse(times[2], out int seconds))
+                {
+                    seconds = 0;
+                }
+                dicCounters[stopwatchId].Stopwatch.StartOffset = new TimeSpan(hours, minutes, seconds);
             }
 
             dicCounters[stopwatchId].Filename = settings.FileName;

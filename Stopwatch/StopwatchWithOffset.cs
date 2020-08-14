@@ -8,7 +8,7 @@ namespace Stopwatch
 {
     public class StopwatchWithOffset : System.Diagnostics.Stopwatch
     {
-        public TimeSpan StartOffset { get; private set; }
+        public TimeSpan StartOffset { get; set; }
 
         public StopwatchWithOffset(TimeSpan startOffset)
         {
