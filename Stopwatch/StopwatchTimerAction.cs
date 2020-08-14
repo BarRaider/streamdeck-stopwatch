@@ -124,6 +124,9 @@ namespace Stopwatch
                 else
                 {
                     PauseStopwatch();
+                    TimeSpan ts = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
+                    settings.StartTime = TimeSpanToReadableFormat(ts, ":");
+                    SaveSettings();
                 }
             }
             else // Stopwatch is already paused
@@ -154,6 +157,11 @@ namespace Stopwatch
         #endregion
 
         #region Private methods
+
+        private Task SaveSettings()
+        {
+            return Connection.SetSettingsAsync(JObject.FromObject(settings));
+        }
 
         private void ResetCounter()
         {
