@@ -31,7 +31,8 @@ namespace Stopwatch
                     Multiline = false,
                     ClearFileOnReset = false,
                     LapMode = false,
-                    FileName = String.Empty
+                    FileName = String.Empty,
+                    StartTime = "00:00:00"
                 };
 
                 return instance;
@@ -45,6 +46,9 @@ namespace Stopwatch
 
             [JsonProperty(PropertyName = "fileName")]
             public string FileName { get; set; }
+
+            [JsonProperty(PropertyName = "startTime")]
+            public string StartTime { get; set; }
 
             [JsonProperty(PropertyName = "clearFileOnReset")]
             public bool ClearFileOnReset { get; set; }
@@ -81,6 +85,8 @@ namespace Stopwatch
             }
             stopwatchId = Connection.ContextId;
 
+            StopwatchManager.Instance.InitializeStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, StartTime = settings.StartTime, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
+
             tmrOnTick.Interval = 250;
             tmrOnTick.Elapsed += TmrOnTick_Elapsed;
             tmrOnTick.Start();
@@ -94,8 +100,10 @@ namespace Stopwatch
 
             if (fileName != settings.FileName)
             {
-                StopwatchManager.Instance.TouchTimerFile(settings.FileName);
+                StopwatchManager.Instance.TouchTimerFile(settings.FileName, settings.StartTime);
             }
+
+            StopwatchManager.Instance.InitializeStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, StartTime = settings.StartTime, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
@@ -120,6 +128,9 @@ namespace Stopwatch
                 else
                 {
                     PauseStopwatch();
+                    TimeSpan ts = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
+                    settings.StartTime = TimeSpanToReadableFormat(ts, ":");
+                    SaveSettings();
                 }
             }
             else // Stopwatch is already paused
@@ -151,14 +162,19 @@ namespace Stopwatch
 
         #region Private methods
 
+        private Task SaveSettings()
+        {
+            return Connection.SetSettingsAsync(JObject.FromObject(settings));
+        }
+
         private void ResetCounter()
         {
-            StopwatchManager.Instance.ResetStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
+            StopwatchManager.Instance.ResetStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, StartTime = settings.StartTime, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
         }
 
         private void ResumeStopwatch()
         {
-            StopwatchManager.Instance.StartStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
+            StopwatchManager.Instance.StartStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, StartTime = settings.StartTime, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
         }
 
         private void CheckIfResetNeeded()
@@ -175,16 +191,16 @@ namespace Stopwatch
                 PauseStopwatch();
                 if (settings.LapMode)
                 {
-                    List<long> laps = StopwatchManager.Instance.GetLaps(stopwatchId);
+                    List<TimeSpan> laps = StopwatchManager.Instance.GetLaps(stopwatchId);
                     List<string> lapStr = new List<string>();
 
-                    foreach (long lap in laps)
+                    foreach (TimeSpan lap in laps)
                     {
-                        lapStr.Add(SecondsToReadableFormat(lap, ":", false));
+                        lapStr.Add(TimeSpanToReadableFormat(lap, ":"));
                     }
                     SaveToClipboard(string.Join("\n", lapStr.ToArray()));
-
                 }
+
                 ResetCounter();
             }
         }
@@ -205,21 +221,14 @@ namespace Stopwatch
             t.Join();
         }
 
-        
         private void PauseStopwatch()
         {
             Stopwatch.StopwatchManager.Instance.StopStopwatch(stopwatchId);
         }
 
-        private string SecondsToReadableFormat(long total, string delimiter, bool secondsOnNewLine)
+        private string TimeSpanToReadableFormat(TimeSpan ts, string delimiter)
         {
-            long minutes, seconds, hours;
-            minutes = total / 60;
-            seconds = total % 60;
-            hours = minutes / 60;
-            minutes %= 60;
-
-            return $"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}{(secondsOnNewLine ? "\n" : delimiter)}{seconds.ToString("00")}";
+            return $"{(int)ts.TotalHours:00}{delimiter}{ts.Minutes:00}{delimiter}{ts.Seconds:00}";
         }
 
         private async void TmrOnTick_Elapsed(object sender, ElapsedEventArgs e)
@@ -230,8 +239,8 @@ namespace Stopwatch
             // so this is the best place to determine if we need to reset (versus the internal timer which may be paused)
             CheckIfResetNeeded();
 
-            long total = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
-            await Connection.SetTitleAsync(SecondsToReadableFormat(total, delimiter, true));
+            TimeSpan ts = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
+            await Connection.SetTitleAsync(TimeSpanToReadableFormat(ts, delimiter));
         }
 
         #endregion

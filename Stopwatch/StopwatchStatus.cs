@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,9 +9,7 @@ namespace Stopwatch
 {
     public class StopwatchStatus
     {
-        public long Counter { get; set; }
-
-        public bool IsEnabled { get; set; }
+        public StopwatchWithOffset Stopwatch { get; set; }
 
         public string Filename { get; set; }
 
@@ -18,15 +17,14 @@ namespace Stopwatch
 
         public bool ClearFileOnReset { get; set; }
 
-        public List<long> Laps { get; set; }
+        public List<TimeSpan> Laps { get; set; }
 
         public StopwatchStatus()
         {
-            Counter = 0;
-            IsEnabled = false;
+            Stopwatch = new StopwatchWithOffset(new TimeSpan(0));
             Filename = String.Empty;
             ClearFileOnReset = false;
-            Laps = new List<long>();
+            Laps = new List<TimeSpan>();
         }
     }
 }

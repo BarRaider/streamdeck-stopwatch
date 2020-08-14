@@ -58,52 +58,51 @@ namespace Stopwatch
 
         public void StartStopwatch(StopwatchSettings settings)
         {
-            InitializeStopwatch(settings);
             if (settings.ResetOnStart)
             {
                 ResetStopwatch(settings);
             }
-            dicCounters[settings.StopwatchId].IsEnabled = true;
+            dicCounters[settings.StopwatchId].Stopwatch.Start();
         }
 
         public void StopStopwatch(string stopwatchId)
         {
             if (dicCounters.ContainsKey(stopwatchId))
             {
-                dicCounters[stopwatchId].IsEnabled = false;
+                dicCounters[stopwatchId].Stopwatch.Stop();
             }
         }
 
         public void ResetStopwatch(StopwatchSettings settings)
         {
-            InitializeStopwatch(settings);
-            dicCounters[settings.StopwatchId].Counter = 0;
+            dicCounters[settings.StopwatchId].Stopwatch.Reset();
             dicCounters[settings.StopwatchId].Laps.Clear();
 
             // Clear file contents
             if (settings.ClearFileOnReset)
             {
-                SaveTimerToFile(settings.FileName, "");
+                SaveTimerToFile(settings.FileName, "00:00:00");
             }
         }
 
         public void RecordLap(string stopwatchId)
         {
-            dicCounters[stopwatchId].Laps.Add(dicCounters[stopwatchId].Counter);
+            dicCounters[stopwatchId].Laps.Add(dicCounters[stopwatchId].Stopwatch.Elapsed);
         }
 
-        public List<long> GetLaps(string stopwatchId)
+        public List<TimeSpan> GetLaps(string stopwatchId)
         {
             return dicCounters[stopwatchId].Laps;
         }
 
-        public long GetStopwatchTime(string stopwatchId)
+        public TimeSpan GetStopwatchTime(string stopwatchId)
         {
             if (!dicCounters.ContainsKey(stopwatchId))
             {
-                return 0;
+                return new TimeSpan(0);
             }
-            return dicCounters[stopwatchId].Counter;
+            
+            return dicCounters[stopwatchId].Stopwatch.Elapsed;
         }
 
         public bool IsStopwatchEnabled(string stopwatchId)
@@ -112,12 +111,12 @@ namespace Stopwatch
             {
                 return false;
             }
-            return dicCounters[stopwatchId].IsEnabled;
+            return dicCounters[stopwatchId].Stopwatch.IsRunning;
         }
 
-        public void TouchTimerFile(string filename)
+        public void TouchTimerFile(string filename, string startTime)
         {
-            SaveTimerToFile(filename, "00:00");
+            SaveTimerToFile(filename, startTime);
         }
 
         #endregion
@@ -128,9 +127,8 @@ namespace Stopwatch
         {
             foreach (string key in dicCounters.Keys)
             {
-                if (dicCounters[key].IsEnabled)
+                if (dicCounters[key].Stopwatch.IsRunning)
                 {
-                    dicCounters[key].Counter++;
                     WriteTimerToFile(key);
                 }
             }
@@ -138,7 +136,6 @@ namespace Stopwatch
 
         private void WriteTimerToFile(string counterKey)
         {
-            long total, minutes, seconds, hours;
             var stopwatchDate = dicCounters[counterKey];
 
             if (String.IsNullOrEmpty(stopwatchDate.Filename))
@@ -146,15 +143,8 @@ namespace Stopwatch
                 return;
             }
 
-
-            total = stopwatchDate.Counter;
-            minutes = total / 60;
-            seconds = total % 60;
-            hours = minutes / 60;
-            minutes %= 60;
-
-            string hoursStr = (hours > 0) ? $"{hours.ToString("00")}:" : "";
-            SaveTimerToFile(stopwatchDate.Filename, $"{hoursStr}{minutes.ToString("00")}:{seconds.ToString("00")}");
+            TimeSpan ts = stopwatchDate.Stopwatch.Elapsed;
+            SaveTimerToFile(stopwatchDate.Filename, $"{(int)ts.TotalHours:00}:{ts.Minutes:00}:{ts.Seconds:00}");
         }
 
         private void SaveTimerToFile(string fileName, string text)
@@ -163,7 +153,6 @@ namespace Stopwatch
             {
                 if (!String.IsNullOrWhiteSpace(fileName))
                 {
-
                     File.WriteAllText(fileName, text);
                 }
             }
@@ -173,7 +162,7 @@ namespace Stopwatch
             }
         }
 
-        private void InitializeStopwatch(StopwatchSettings settings)
+        public void InitializeStopwatch(StopwatchSettings settings)
         {
             string stopwatchId = settings.StopwatchId;
             if (!dicCounters.ContainsKey(stopwatchId))
@@ -181,6 +170,22 @@ namespace Stopwatch
                 dicCounters[stopwatchId] = new StopwatchStatus();
             }
 
+            var times = settings.StartTime.Split(':');
+            if (!int.TryParse(times[0], out int hours))
+            {
+                hours = 0;
+            }
+            if (!int.TryParse(times[1], out int minutes))
+            {
+                minutes = 0;
+            }
+            if (!int.TryParse(times[2], out int seconds))
+            {
+                seconds = 0;
+            }
+
+            dicCounters[stopwatchId].Stopwatch.Reset();
+            dicCounters[stopwatchId].Stopwatch.StartOffset = new TimeSpan(hours, minutes, seconds);
             dicCounters[stopwatchId].Filename = settings.FileName;
             dicCounters[stopwatchId].ClearFileOnReset = settings.ClearFileOnReset;
             dicCounters[stopwatchId].LapMode = settings.LapMode;

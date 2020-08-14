@@ -17,5 +17,7 @@ namespace Stopwatch
         internal bool LapMode { get; set; }
 
         internal string FileName { get; set; }
+
+        internal string StartTime { get; set; }
     }
 }
