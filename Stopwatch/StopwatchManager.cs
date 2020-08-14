@@ -58,7 +58,6 @@ namespace Stopwatch
 
         public void StartStopwatch(StopwatchSettings settings)
         {
-            InitializeStopwatch(settings);
             if (settings.ResetOnStart)
             {
                 ResetStopwatch(settings);
@@ -76,7 +75,6 @@ namespace Stopwatch
 
         public void ResetStopwatch(StopwatchSettings settings)
         {
-            InitializeStopwatch(settings);
             dicCounters[settings.StopwatchId].Stopwatch.Reset();
             dicCounters[settings.StopwatchId].Laps.Clear();
 
@@ -164,29 +162,30 @@ namespace Stopwatch
             }
         }
 
-        private void InitializeStopwatch(StopwatchSettings settings)
+        public void InitializeStopwatch(StopwatchSettings settings)
         {
             string stopwatchId = settings.StopwatchId;
             if (!dicCounters.ContainsKey(stopwatchId))
             {
                 dicCounters[stopwatchId] = new StopwatchStatus();
-
-                var times = settings.StartTime.Split(':');
-                if (!int.TryParse(times[0], out int hours))
-                {
-                    hours = 0;
-                }
-                if (!int.TryParse(times[1], out int minutes))
-                {
-                    minutes = 0;
-                }
-                if (!int.TryParse(times[2], out int seconds))
-                {
-                    seconds = 0;
-                }
-                dicCounters[stopwatchId].Stopwatch.StartOffset = new TimeSpan(hours, minutes, seconds);
             }
 
+            var times = settings.StartTime.Split(':');
+            if (!int.TryParse(times[0], out int hours))
+            {
+                hours = 0;
+            }
+            if (!int.TryParse(times[1], out int minutes))
+            {
+                minutes = 0;
+            }
+            if (!int.TryParse(times[2], out int seconds))
+            {
+                seconds = 0;
+            }
+
+            dicCounters[stopwatchId].Stopwatch.Reset();
+            dicCounters[stopwatchId].Stopwatch.StartOffset = new TimeSpan(hours, minutes, seconds);
             dicCounters[stopwatchId].Filename = settings.FileName;
             dicCounters[stopwatchId].ClearFileOnReset = settings.ClearFileOnReset;
             dicCounters[stopwatchId].LapMode = settings.LapMode;

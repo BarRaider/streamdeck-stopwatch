@@ -85,6 +85,8 @@ namespace Stopwatch
             }
             stopwatchId = Connection.ContextId;
 
+            StopwatchManager.Instance.InitializeStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, StartTime = settings.StartTime, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
+
             tmrOnTick.Interval = 250;
             tmrOnTick.Elapsed += TmrOnTick_Elapsed;
             tmrOnTick.Start();
@@ -100,6 +102,8 @@ namespace Stopwatch
             {
                 StopwatchManager.Instance.TouchTimerFile(settings.FileName, settings.StartTime);
             }
+
+            StopwatchManager.Instance.InitializeStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, StartTime = settings.StartTime, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
