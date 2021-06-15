@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Stopwatch
+namespace Stopwatch.Backend
 {
     internal class StopwatchManager
     {
@@ -63,6 +63,11 @@ namespace Stopwatch
             {
                 ResetStopwatch(settings);
             }
+            else // Stopwatch was paused, need to resume
+            {
+                var status = dicCounters[settings.StopwatchId];
+                status.StartTime = DateTime.Now.AddSeconds(-1 * status.GetSeconds());
+            }
             dicCounters[settings.StopwatchId].IsEnabled = true;
         }
 
@@ -70,6 +75,7 @@ namespace Stopwatch
         {
             if (dicCounters.ContainsKey(stopwatchId))
             {
+                dicCounters[stopwatchId].EndTime = DateTime.Now;
                 dicCounters[stopwatchId].IsEnabled = false;
             }
         }
@@ -77,8 +83,9 @@ namespace Stopwatch
         public void ResetStopwatch(StopwatchSettings settings)
         {
             InitializeStopwatch(settings);
-            dicCounters[settings.StopwatchId].Counter = 0;
+            dicCounters[settings.StopwatchId].StartTime = DateTime.Now;
             dicCounters[settings.StopwatchId].Laps.Clear();
+            dicCounters[settings.StopwatchId].EndTime = null;
 
             // Clear file contents
             if (settings.ClearFileOnReset)
@@ -89,10 +96,10 @@ namespace Stopwatch
 
         public void RecordLap(string stopwatchId)
         {
-            dicCounters[stopwatchId].Laps.Add(dicCounters[stopwatchId].Counter);
+            dicCounters[stopwatchId].Laps.Add(DateTime.Now);
         }
 
-        public List<long> GetLaps(string stopwatchId)
+        public List<DateTime> GetLaps(string stopwatchId)
         {
             return dicCounters[stopwatchId].Laps;
         }
@@ -103,7 +110,16 @@ namespace Stopwatch
             {
                 return 0;
             }
-            return dicCounters[stopwatchId].Counter;
+            return dicCounters[stopwatchId].GetSeconds();
+        }
+
+        public DateTime GetStopwatchStartTime(string stopwatchId)
+        {
+            if (!dicCounters.ContainsKey(stopwatchId))
+            {
+                return DateTime.MinValue;
+            }
+            return dicCounters[stopwatchId].StartTime;
         }
 
         public bool IsStopwatchEnabled(string stopwatchId)
@@ -130,7 +146,6 @@ namespace Stopwatch
             {
                 if (dicCounters[key].IsEnabled)
                 {
-                    dicCounters[key].Counter++;
                     WriteTimerToFile(key);
                 }
             }
@@ -147,7 +162,7 @@ namespace Stopwatch
             }
 
 
-            total = stopwatchDate.Counter;
+            total = (long)(DateTime.Now - stopwatchDate.StartTime).TotalSeconds;
             minutes = total / 60;
             seconds = total % 60;
             hours = minutes / 60;
