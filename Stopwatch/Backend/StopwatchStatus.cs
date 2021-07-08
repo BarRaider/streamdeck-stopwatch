@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Stopwatch.Backend
 {
     public class StopwatchStatus
     {
-        public DateTime StartTime { get; set; }
-
-        public DateTime? EndTime { get; set; } = null;
-
-        public bool IsEnabled { get; set; }
+        public bool IsEnabled => sw?.IsRunning ?? false;
 
         public string Filename { get; set; }
 
@@ -20,27 +17,36 @@ namespace Stopwatch.Backend
 
         public bool ClearFileOnReset { get; set; }
 
-        public List<DateTime> Laps { get; set; }
+        public List<long> Laps { get; set; }
+
+        private System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
         public StopwatchStatus()
         {
-            StartTime = DateTime.Now;
-            IsEnabled = false;
             Filename = String.Empty;
             ClearFileOnReset = false;
-            Laps = new List<DateTime>();
+            Laps = new List<long>();
         }
 
         public long GetSeconds()
         {
-            if (IsEnabled || !EndTime.HasValue)
-            {
-                return (long)(DateTime.Now - StartTime).TotalSeconds;
-            }
-            else
-            {
-                return (long)(EndTime.Value - StartTime).TotalSeconds;
-            }
+            return (long)sw.Elapsed.TotalSeconds;
         }
+
+        public void Start()
+        {
+            sw.Start();
+        }
+
+        public void Stop()
+        {
+            sw.Stop();
+        }
+
+        public void Reset()
+        {
+            sw = new System.Diagnostics.Stopwatch();
+        }
+
     }
 }

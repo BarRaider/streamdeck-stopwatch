@@ -206,13 +206,12 @@ namespace Stopwatch.Actions
                 PauseStopwatch();
                 if (settings.LapMode)
                 {
-                    DateTime startTime = StopwatchManager.Instance.GetStopwatchStartTime(stopwatchId);
-                    List<DateTime> laps = StopwatchManager.Instance.GetLaps(stopwatchId);
+                    List<long> laps = StopwatchManager.Instance.GetLaps(stopwatchId);
                     List<string> lapStr = new List<string>();
 
-                    foreach (DateTime lap in laps)
+                    foreach (long lap in laps)
                     {
-                        lapStr.Add(SecondsToReadableFormat((long)(lap - startTime).TotalSeconds, ":", false));
+                        lapStr.Add(SecondsToReadableFormat(lap, ":", false));
                     }
                     SaveToClipboard(string.Join("\n", lapStr.ToArray()));
 
