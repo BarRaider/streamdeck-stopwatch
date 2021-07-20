@@ -1,15 +1,18 @@
 ﻿using BarRaider.SdTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Stopwatch.Backend;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Stopwatch
+namespace Stopwatch.Actions
 {
     [PluginActionId("com.barraider.stopwatch")]
     public class StopwatchTimerAction : PluginBase
@@ -31,7 +34,10 @@ namespace Stopwatch
                     Multiline = false,
                     ClearFileOnReset = false,
                     LapMode = false,
-                    FileName = String.Empty
+                    FileName = String.Empty,
+                    SharedId = String.Empty,
+                    PauseImageFile = String.Empty,
+                    EnabledImageFile = String.Empty
                 };
 
                 return instance;
@@ -51,18 +57,38 @@ namespace Stopwatch
 
             [JsonProperty(PropertyName = "lapMode")]
             public bool LapMode { get; set; }
+
+            [JsonProperty(PropertyName = "sharedId")]
+            public string SharedId { get; set; }
+
+            [FilenameProperty]
+            [JsonProperty(PropertyName = "pauseImageFile")]
+            public string PauseImageFile { get; set; }
+
+            [FilenameProperty]
+            [JsonProperty(PropertyName = "enabledImageFile")]
+            public string EnabledImageFile { get; set; }
+
         }
 
         #region Private members
 
-        private const int RESET_COUNTER_KEYPRESS_LENGTH = 1000;
+        private const int RESET_COUNTER_KEYPRESS_LENGTH = 600;
+        private readonly string[] DEFAULT_IMAGES = new string[]
+        {
+            @"images\bg@2x.png",
+            @"images\bgEnabled.png"
+        };
 
         private readonly PluginSettings settings;
         private bool keyPressed = false;
         private bool longKeyPress = false;
         private DateTime keyPressStart;
-        private readonly string stopwatchId;
+        private string stopwatchId;
         private readonly System.Timers.Timer tmrOnTick = new System.Timers.Timer();
+        private Image pauseImage;
+        private Image enabledImage;
+
 
         #endregion
 
@@ -79,27 +105,36 @@ namespace Stopwatch
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
-            stopwatchId = Connection.ContextId;
+            InitializeSettings();
+            Connection.OnSendToPlugin += Connection_OnSendToPlugin;
 
             tmrOnTick.Interval = 250;
             tmrOnTick.Elapsed += TmrOnTick_Elapsed;
             tmrOnTick.Start();
         }
 
+
+        public override void Dispose()
+        {
+            tmrOnTick.Stop();
+            Connection.OnSendToPlugin -= Connection_OnSendToPlugin;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Destructor called");
+        }
+
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
             string fileName = settings.FileName;
-            // New in StreamDeck-Tools v2.0:
             Tools.AutoPopulateSettings(settings, payload.Settings);
-
+            InitializeSettings();
             if (fileName != settings.FileName)
             {
                 StopwatchManager.Instance.TouchTimerFile(settings.FileName);
             }
+            SaveSettings();
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
-        {}
+        { }
 
 
         public override void KeyPressed(KeyPayload payload)
@@ -110,6 +145,12 @@ namespace Stopwatch
             longKeyPress = false;
 
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
+
+            if (payload.IsInMultiAction)
+            {
+                HandleMultiActionKeyPress(payload.UserDesiredState);
+                return;
+            }
 
             if (StopwatchManager.Instance.IsStopwatchEnabled(stopwatchId)) // Stopwatch is already running
             {
@@ -124,12 +165,7 @@ namespace Stopwatch
             }
             else // Stopwatch is already paused
             {
-                if (!settings.ResumeOnClick)
-                {
-                    ResetCounter();
-                }
-
-                ResumeStopwatch();
+                HandleStopwatchResume();
             }
         }
 
@@ -141,11 +177,6 @@ namespace Stopwatch
 
         // Using timer instead
         public override void OnTick() { }
-
-        public override void Dispose()
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Destructor called");
-        }
 
         #endregion
 
@@ -205,10 +236,10 @@ namespace Stopwatch
             t.Join();
         }
 
-        
+
         private void PauseStopwatch()
         {
-            Stopwatch.StopwatchManager.Instance.StopStopwatch(stopwatchId);
+            StopwatchManager.Instance.StopStopwatch(stopwatchId);
         }
 
         private string SecondsToReadableFormat(long total, string delimiter, bool secondsOnNewLine)
@@ -232,8 +263,130 @@ namespace Stopwatch
 
             long total = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
             await Connection.SetTitleAsync(SecondsToReadableFormat(total, delimiter, true));
+            await Connection.SetImageAsync(StopwatchManager.Instance.IsStopwatchEnabled(stopwatchId) ? enabledImage : pauseImage);
+        }
+        private Task SaveSettings()
+        {
+            return Connection.SetSettingsAsync(JObject.FromObject(settings));
         }
 
+        private void InitializeSettings()
+        {
+            if (String.IsNullOrWhiteSpace(settings.SharedId))
+            {
+                stopwatchId = Connection.ContextId;
+            }
+            else
+            {
+                stopwatchId = settings.SharedId;
+            }
+
+            PrefetchImages();
+        }
+
+        private void Connection_OnSendToPlugin(object sender, BarRaider.SdTools.Wrappers.SDEventReceivedEventArgs<BarRaider.SdTools.Events.SendToPlugin> e)
+        {
+            var payload = e.Event.Payload;
+
+            Logger.Instance.LogMessage(TracingLevel.INFO, "OnSendToPlugin called");
+            if (payload["property_inspector"] != null)
+            {
+                switch (payload["property_inspector"].ToString().ToLowerInvariant())
+                {
+                    case "loadsavepicker":
+                        string propertyName = (string)payload["property_name"];
+                        string pickerTitle = (string)payload["picker_title"];
+                        string pickerFilter = (string)payload["picker_filter"];
+                        string fileName = PickersUtil.Pickers.SaveFilePicker(pickerTitle, null, pickerFilter);
+                        if (!string.IsNullOrEmpty(fileName))
+                        {
+                            if (!PickersUtil.Pickers.SetJsonPropertyValue(settings, propertyName, fileName))
+                            {
+                                Logger.Instance.LogMessage(TracingLevel.ERROR, "Failed to save picker value to settings");
+                            }
+                            SaveSettings();
+                        }
+                        break;
+                }
+            }
+        }
+
+        private void PrefetchImages()
+        {
+            if (pauseImage != null)
+            {
+                pauseImage.Dispose();
+                pauseImage = null;
+            }
+            pauseImage = TryLoadCustomImage(settings.PauseImageFile, DEFAULT_IMAGES[0]);
+
+            if (enabledImage != null)
+            {
+                enabledImage.Dispose();
+                enabledImage = null;
+            }
+            enabledImage = TryLoadCustomImage(settings.EnabledImageFile, DEFAULT_IMAGES[1]);
+        }
+
+        private Image TryLoadCustomImage(string customImageFileName, string defaultImageFileName)
+        {
+            if (String.IsNullOrEmpty(customImageFileName))
+            {
+                return Image.FromFile(defaultImageFileName);
+            }
+            else if (!File.Exists(customImageFileName))
+            {
+
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"{this.GetType()} Custom image not found: {customImageFileName}");
+                return Image.FromFile(defaultImageFileName);
+            }
+            else
+            {
+                return Image.FromFile(customImageFileName);
+            }
+        }
+
+        private void HandleStopwatchResume()
+        {
+            if (!settings.ResumeOnClick)
+            {
+                ResetCounter();
+            }
+
+            ResumeStopwatch();
+        }
+
+        private void HandleMultiActionKeyPress(uint state)
+        {
+            switch (state) // 0 = Toggle, 1 = Start, 2 = Stop
+            {
+                case 0:
+                    if (StopwatchManager.Instance.IsStopwatchEnabled(stopwatchId))
+                    {
+                        PauseStopwatch();
+                    }
+                    else
+                    {
+                        HandleStopwatchResume();
+                    }
+                    break;
+                case 1:
+                    if (!StopwatchManager.Instance.IsStopwatchEnabled(stopwatchId))
+                    {
+                        HandleStopwatchResume();
+                    }
+                    break;
+                case 2:
+                    if (StopwatchManager.Instance.IsStopwatchEnabled(stopwatchId))
+                    {
+                        PauseStopwatch();
+                    }
+                    break;
+                default:
+                    Logger.Instance.LogMessage(TracingLevel.ERROR, $"{this.GetType()} HandleMultiActionKeyPress: Unsupported state {state}");
+                    break;
+            }
+        }
         #endregion
     }
 }

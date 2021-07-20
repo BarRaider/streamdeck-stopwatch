@@ -7,21 +7,30 @@
         {
           "Image": "Images/bg",
           "TitleAlignment": "bottom",
-          "FontSize": "16"
+          "FontSize": "16",
+          "Name": "Toggle"
+        },
+        {
+          "Name": "Enable",
+          "OnlyForMultiAction": true
+        },
+        {
+          "Name": "Disable",
+          "OnlyForMultiAction": true
         }
       ],
-      "SupportedInMultiActions": false,
+      "SupportedInMultiActions": true,
       "Tooltip": "Stopwatch implementation with various display and behaviour settings.",
       "UUID": "com.barraider.stopwatch",
-      "PropertyInspectorPath": "PropertyInspector/Stopwatch/Index.html"
+      "PropertyInspectorPath": "PropertyInspector/Stopwatch/Stopwatch.html"
     }
   ],
   "Author": "BarRaider",
-  "Description": "Stopwatch implementation with various display and behaviour settings.\nNew: Time is written to a file of your choice so you can display the elapsed time on your stream.",
+  "Description": "Stopwatch that you can also display on your stream.",
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
   "URL": "https://BarRaider.com/",
-  "Version": "1.6",
+  "Version": "1.7",
   "CodePath": "com.barraider.stopwatch",
   "Category": "BarRaider",
   "CategoryIcon": "Images/categoryIcon",
@@ -33,6 +42,6 @@
   ],
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "4.1"
+    "MinimumVersion": "5.0"
   }
 }
