@@ -6,9 +6,9 @@
     <meta name=apple-mobile-web-app-capable content=yes>
     <meta name=apple-mobile-web-app-status-bar-style content=black>
     <title>BarRaider's Stopwatch</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdpi.css">
-    <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdtools.common.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/pickers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi-v2@latest/src/sdpi.css">
+    <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi-v2@latest/src/sdtools.common.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi-v2@latest/src/pickers.js"></script>
 
 </head>
 <body>
@@ -19,17 +19,21 @@
         <details class="message">
             <summary>Tip: Long press resets the stopwatch</summary>
         </details>
-        <div class="sdpi-item" id="dvFileName">
-            <div class="sdpi-item-label">Save to file</div>
-            <input class="sdpi-item-value sdProperty hasFileButton" disabled value="" id="fileName">
-            <button class="max100 leftMargin0" onclick="openSaveFilePicker('Stopwatch File Name', 'Text files (*.txt)|*.txt|All files (*.*)|*.*', 'fileName');">...</button>
-        </div>
-        <div type="checkbox" class="sdpi-item" id="dvClearFileOnReset">
-            <div class="sdpi-item-label">Clear on Reset</div>
-            <div class="sdpi-item-value">
-                <input id="clearFileOnReset" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
-                <label for="clearFileOnReset" class="sdpi-item-label"><span></span>Clear text file on reset</label>
-            </div>
+        <div class="sdpi-heading">DISPLAY FORMAT</div>
+        <div class="sdpi-item" id="dvTimeFormat">
+            <div class="sdpi-item-label">Format</div>
+            <select class="sdpi-item-value select sdProperty" id="timeFormat" oninput="setSettings()" value="hh:mm:ss">
+                <option value="d.hh">[d.]hh</option>
+                <option value="d.h:mm">[d.]h:mm</option>
+                <option value="d.hh:mm">[d.]hh:mm</option>
+                <option value="hh:mm:ss" selected>[hh:]mm:ss</option>
+                <option value="h:mm:ss">[h:]mm:ss</option>
+                <option value="hh:mm">hh:mm</option>
+                <option value="mm:ss">mm:ss</option>
+                <option value="mm:ss.ms">mm:ss.ms</option>
+                <option value="ss">ss</option>
+                <option value="ss.ms">ss.ms</option>
+            </select>
         </div>
         <div type="checkbox" class="sdpi-item" id="dvMultilineStopwatch">
             <div class="sdpi-item-label">Multiline</div>
@@ -38,6 +42,7 @@
                 <label for="multiline" class="sdpi-item-label"><span></span>3 different lines</label>
             </div>
         </div>
+        <div class="sdpi-heading">BEHAVIOUR</div>
         <div type="checkbox" class="sdpi-item" id="dvClickResume">
             <div class="sdpi-item-label">Resume on click</div>
             <div class="sdpi-item-value">
@@ -56,6 +61,25 @@
             <summary>For 'Lap Mode' usage instructions <span class="linkspan"> CLICK HERE</span></summary>
             <p>In Lap mode, each press records a lap, Long press stops. After a long press, all laps are copied to clipboard</p>
         </details>
+        <div class="sdpi-heading">FILE SETTINGS</div>
+        <div class="sdpi-item" id="dvFileName">
+            <div class="sdpi-item-label">Save to file</div>
+            <input class="sdpi-item-value sdProperty hasFileButton" disabled value="" id="fileName">
+            <button class="max100 leftMargin0" onclick="openSaveFilePicker('Stopwatch File Name', 'Text files (*.txt)|*.txt|All files (*.*)|*.*', 'fileName');">...</button>
+        </div>
+        <div class="sdpi-item" id="dvFilePrefix">
+            <div class="sdpi-item-label">File Title Prefix</div>
+            <input class="sdpi-item-value sdProperty" placeholder="" value="" id="filePrefix" oninput="setSettings()">
+        </div>
+        <div type="checkbox" class="sdpi-item" id="dvClearFileOnReset">
+            <div class="sdpi-item-label">Clear on Reset</div>
+            <div class="sdpi-item-value">
+                <input id="clearFileOnReset" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
+                <label for="clearFileOnReset" class="sdpi-item-label"><span></span>Clear text file on reset</label>
+            </div>
+        </div>
+
+        <div class="sdpi-heading">ADVANCED SETTINGS</div>
         <div class="sdpi-item" id="dvSharedId">
             <div class="sdpi-item-label">Shared Id (optional)</div>
             <input class="sdpi-item-value sdProperty" placeholder="watch1" value="" id="sharedId" oninput="setSettings()">

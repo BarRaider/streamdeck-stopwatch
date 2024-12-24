@@ -6,7 +6,7 @@
       "States": [
         {
           "Image": "Images/bg",
-          "TitleAlignment": "bottom",
+          "TitleAlignment": "middle",
           "FontSize": "16",
           "Name": "Toggle"
         },
@@ -30,7 +30,7 @@
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
   "URL": "https://BarRaider.com/",
-  "Version": "1.7",
+  "Version": "1.7.1",
   "CodePath": "com.barraider.stopwatch",
   "Category": "BarRaider",
   "CategoryIcon": "Images/categoryIcon",
