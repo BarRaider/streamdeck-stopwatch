@@ -15,7 +15,7 @@ using System.Timers;
 namespace Stopwatch.Actions
 {
     [PluginActionId("com.barraider.stopwatch")]
-    public class StopwatchTimerAction : PluginBase
+    public class StopwatchTimerAction : KeypadBase
     {
 
         //---------------------------------------------------
@@ -37,7 +37,9 @@ namespace Stopwatch.Actions
                     FileName = String.Empty,
                     SharedId = String.Empty,
                     PauseImageFile = String.Empty,
-                    EnabledImageFile = String.Empty
+                    EnabledImageFile = String.Empty,
+                    TimeFormat = HelperUtils.DEFAULT_TIME_FORMAT,
+                    FilePrefix = String.Empty
                 };
 
                 return instance;
@@ -69,6 +71,12 @@ namespace Stopwatch.Actions
             [JsonProperty(PropertyName = "enabledImageFile")]
             public string EnabledImageFile { get; set; }
 
+            [JsonProperty(PropertyName = "timeFormat")]
+            public string TimeFormat { get; set; }
+
+            [JsonProperty(PropertyName = "filePrefix")]
+            public string FilePrefix { get; set; }
+            
         }
 
         #region Private members
@@ -184,12 +192,29 @@ namespace Stopwatch.Actions
 
         private void ResetCounter()
         {
-            StopwatchManager.Instance.ResetStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
+            StopwatchManager.Instance.ResetStopwatch(new StopwatchSettings() 
+                { 
+                    StopwatchId = stopwatchId, 
+                    FileName = settings.FileName, 
+                    ClearFileOnReset = settings.ClearFileOnReset, 
+                    LapMode = settings.LapMode, 
+                    ResetOnStart = !settings.ResumeOnClick, 
+                    TimeFormat = settings.TimeFormat, 
+                    FileTitlePrefix = settings.FilePrefix 
+                });
         }
 
         private void ResumeStopwatch()
         {
-            StopwatchManager.Instance.StartStopwatch(new StopwatchSettings() { StopwatchId = stopwatchId, FileName = settings.FileName, ClearFileOnReset = settings.ClearFileOnReset, LapMode = settings.LapMode, ResetOnStart = !settings.ResumeOnClick });
+            StopwatchManager.Instance.StartStopwatch(new StopwatchSettings() 
+                { 
+                    StopwatchId = stopwatchId, 
+                    FileName = settings.FileName, 
+                    ClearFileOnReset = settings.ClearFileOnReset, 
+                    LapMode = settings.LapMode, 
+                    ResetOnStart = !settings.ResumeOnClick, 
+                    TimeFormat = settings.TimeFormat, 
+                    FileTitlePrefix = settings.FilePrefix });
         }
 
         private void CheckIfResetNeeded()
@@ -211,7 +236,7 @@ namespace Stopwatch.Actions
 
                     foreach (long lap in laps)
                     {
-                        lapStr.Add(SecondsToReadableFormat(lap, ":", false));
+                        lapStr.Add(FormatTime(lap, false));
                     }
                     SaveToClipboard(string.Join("\n", lapStr.ToArray()));
 
@@ -242,15 +267,9 @@ namespace Stopwatch.Actions
             StopwatchManager.Instance.StopStopwatch(stopwatchId);
         }
 
-        private string SecondsToReadableFormat(long total, string delimiter, bool secondsOnNewLine)
+        private string FormatTime(long timeInMiliseconds, bool setNewLineDelimiter)
         {
-            long minutes, seconds, hours;
-            minutes = total / 60;
-            seconds = total % 60;
-            hours = minutes / 60;
-            minutes %= 60;
-
-            return $"{hours.ToString("00")}{delimiter}{minutes.ToString("00")}{(secondsOnNewLine ? "\n" : delimiter)}{seconds.ToString("00")}";
+            return HelperUtils.FormatTime(timeInMiliseconds, settings.TimeFormat, setNewLineDelimiter);
         }
 
         private async void TmrOnTick_Elapsed(object sender, ElapsedEventArgs e)
@@ -261,8 +280,8 @@ namespace Stopwatch.Actions
             // so this is the best place to determine if we need to reset (versus the internal timer which may be paused)
             CheckIfResetNeeded();
 
-            long total = StopwatchManager.Instance.GetStopwatchTime(stopwatchId);
-            await Connection.SetTitleAsync(SecondsToReadableFormat(total, delimiter, true));
+            long total = StopwatchManager.Instance.GetStopwatchTimeInMiliseconds(stopwatchId);
+            await Connection.SetTitleAsync(FormatTime(total, settings.Multiline));
             await Connection.SetImageAsync(StopwatchManager.Instance.IsStopwatchEnabled(stopwatchId) ? enabledImage : pauseImage);
         }
         private Task SaveSettings()
