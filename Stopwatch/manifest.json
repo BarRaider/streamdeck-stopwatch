@@ -30,7 +30,7 @@
   "Name": "Stopwatch",
   "Icon": "Images/pluginIcon",
   "URL": "https://BarRaider.com/",
-  "Version": "1.7.1",
+  "Version": "1.8",
   "CodePath": "com.barraider.stopwatch",
   "Category": "BarRaider",
   "CategoryIcon": "Images/categoryIcon",
@@ -42,6 +42,6 @@
   ],
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "5.0"
+    "MinimumVersion": "6.8.1"
   }
 }
