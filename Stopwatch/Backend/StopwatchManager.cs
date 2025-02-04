@@ -91,7 +91,7 @@ namespace Stopwatch.Backend
 
         public void RecordLap(string stopwatchId)
         {
-            dicCounters[stopwatchId].Laps.Add(GetStopwatchTime(stopwatchId));
+            dicCounters[stopwatchId].Laps.Add(GetStopwatchTimeInMiliseconds(stopwatchId));
         }
 
         public List<long> GetLaps(string stopwatchId)
@@ -99,13 +99,13 @@ namespace Stopwatch.Backend
             return dicCounters[stopwatchId].Laps;
         }
 
-        public long GetStopwatchTime(string stopwatchId)
+        public long GetStopwatchTimeInMiliseconds(string stopwatchId)
         {
             if (!dicCounters.ContainsKey(stopwatchId))
             {
                 return 0;
             }
-            return dicCounters[stopwatchId].GetSeconds();
+            return dicCounters[stopwatchId].GetMiliseconds();
         }
 
         public bool IsStopwatchEnabled(string stopwatchId)
@@ -119,7 +119,7 @@ namespace Stopwatch.Backend
 
         public void TouchTimerFile(string filename)
         {
-            SaveTimerToFile(filename, "00:00");
+            SaveTimerToFile(filename, $"00:00");
         }
 
         #endregion
@@ -139,23 +139,16 @@ namespace Stopwatch.Backend
 
         private void WriteTimerToFile(string counterKey)
         {
-            long total, minutes, seconds, hours;
-            var stopwatchDate = dicCounters[counterKey];
+            var stopwatchData = dicCounters[counterKey];
 
-            if (String.IsNullOrEmpty(stopwatchDate.Filename))
+            if (String.IsNullOrEmpty(stopwatchData.Filename))
             {
                 return;
             }
 
 
-            total = stopwatchDate.GetSeconds();
-            minutes = total / 60;
-            seconds = total % 60;
-            hours = minutes / 60;
-            minutes %= 60;
-
-            string hoursStr = (hours > 0) ? $"{hours.ToString("00")}:" : "";
-            SaveTimerToFile(stopwatchDate.Filename, $"{hoursStr}{minutes.ToString("00")}:{seconds.ToString("00")}");
+            var total = stopwatchData.GetMiliseconds();
+            SaveTimerToFile(stopwatchData.Filename, $"{stopwatchData.FileTitlePrefix}{HelperUtils.FormatTime(total, stopwatchData.TimeFormat, false)}");
         }
 
         private void SaveTimerToFile(string fileName, string text)
@@ -183,8 +176,10 @@ namespace Stopwatch.Backend
             }
 
             dicCounters[stopwatchId].Filename = settings.FileName;
+            dicCounters[stopwatchId].FileTitlePrefix = settings.FileTitlePrefix;
             dicCounters[stopwatchId].ClearFileOnReset = settings.ClearFileOnReset;
             dicCounters[stopwatchId].LapMode = settings.LapMode;
+            dicCounters[stopwatchId].TimeFormat = settings.TimeFormat;
         }
 
         #endregion

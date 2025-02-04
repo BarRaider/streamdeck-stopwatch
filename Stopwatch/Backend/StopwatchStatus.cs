@@ -13,11 +13,15 @@ namespace Stopwatch.Backend
 
         public string Filename { get; set; }
 
+        public string FileTitlePrefix { get; set; }
+
         public bool LapMode { get; set; }
 
         public bool ClearFileOnReset { get; set; }
 
         public List<long> Laps { get; set; }
+
+        public string TimeFormat { get; set; }
 
         private System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
@@ -26,11 +30,19 @@ namespace Stopwatch.Backend
             Filename = String.Empty;
             ClearFileOnReset = false;
             Laps = new List<long>();
+            TimeFormat = HelperUtils.DEFAULT_TIME_FORMAT;
+            FileTitlePrefix = String.Empty;
+
         }
 
         public long GetSeconds()
         {
             return (long)sw.Elapsed.TotalSeconds;
+        }
+
+        public long GetMiliseconds()
+        {
+            return (long)sw.Elapsed.TotalMilliseconds;
         }
 
         public void Start()
