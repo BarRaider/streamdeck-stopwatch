@@ -3,6 +3,12 @@ A C# Stopwatch implementation for the Elgato Stream Deck device.
 
 **Author's website and contact information:** [https://barraider.github.io](https://barraider.github.io)
 
+## New in v1.8
+
+* New milliseconds support for greater accuracy
+* Choose from 10 different `time formats` to display as much or as less detail on the key as needed. 🔥
+* New `File Title Prefix` setting allows to set chosen text before the time when saved to file (great to show some text before the time on stream!)
+
 ## New in v1.7
 *Our faithful Stopwatch plugin coming back with a much needed overhaul:*
 - Visual indication if the stopwatch is running or stopped
